@@ -1,0 +1,55 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="author" content="Xj">
+    <meta name="description" content="RdChat">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>RdChat</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+</head>
+<body>
+<div class="wrapper">
+    <div class="left">
+        <div class="banner">
+            <span id="status"></span>
+        </div>
+        <div id="historyMsg">
+        </div>
+        <div class="controls" >
+            <div class="items">
+                <input id="colorStyle" type="color" placeHolder='#000' title="font color" />
+                <input id="emoji" type="button" value="emoji" title="emoji" />
+                <label for="sendImage" class="imageLable">
+                    <input type="button" value="image"  />
+                    <input id="sendImage" type="file" value="image"/>
+                </label>
+                <input id="clearBtn" type="button" value="clear" title="clear screen" />
+            </div>
+            <textarea id="messageInput" placeHolder="enter to send"></textarea>
+            <input id="sendBtn" type="button" value="SEND">
+            <div id="emojiWrapper">
+            </div>
+        </div>
+    </div>
+    <!--右侧联系人列表-->
+    <div class="right">
+        <select name="select" id="userlist" size="15" id="select">
+        </select>
+    </div>
+</div>
+
+<div id="loginWrapper">
+    <p id="info">connecting to server...</p>
+    <div id="nickWrapper">
+        <input type="text" placeHolder="nickname" id="nicknameInput" />
+        <input type="button" value="OK" id="loginBtn" />
+    </div>
+</div>
+<script src="http://192.168.1.198:3000/socket.io/socket.io.js"></script><!--一定要这个js-->
+<script src="../public/javascripts/chat.js"></script>
+</body>
+</html>

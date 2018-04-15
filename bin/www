@@ -1,0 +1,73 @@
+var express = require('express'),
+    app = express(),
+    server = require('http').createServer(app);
+
+ var   io = require('socket.io').listen(server);
+//指定静态HTML文件的位置
+app.use('/', express.static(__dirname + '/www'));
+
+
+var onlineUsers = {};//在线用户列表
+var socketList = {};//每个用户所持有的与服务器交互的socket列表
+var onlineCount = 0;//在线人数
+
+//处理socket事件
+io.on('connection', function(socket) {
+         console.log("socket 已连接");
+    //新用户登陆
+    socket.on('login', function(obj) {
+        if (onlineUsers.hasOwnProperty(obj.userid)) {
+            socket.emit('userExisted');
+        } else {
+            socket.name = obj.userid;
+            socketList[obj.userid] = socket;
+            //检查在线用户列表，如果不存在，则将该用户加入在线用户表
+            if(!onlineUsers.hasOwnProperty(obj.userid)) {
+                onlineUsers[obj.userid] = obj.nickname;
+                //在线人数+1
+                onlineCount++;
+            }
+            socket.emit('loginSuccess',{onlineUsers:onlineUsers, onlineCount:onlineCount, user:obj});
+            io.sockets.emit('system', obj, onlineCount, 'login');
+        };
+    });
+    //用户离线
+    socket.on('disconnect', function() {
+        //将退出的用户从在线列表中删除
+        if(onlineUsers.hasOwnProperty(socket.name)) {
+            //退出用户的信息
+            var obj = {userid:socket.name, nickname:onlineUsers[socket.name]};
+
+            //删除
+            delete onlineUsers[socket.name];
+            delete socketList[socket.name];
+            //在线人数-1
+            onlineCount--;
+
+            //向所有客户端广播用户退出
+            socket.broadcast.emit('system', obj, onlineCount, 'logout');
+        }
+    });
+    //接收新信息
+    socket.on('postMsg', function(msg, color) {
+        console.log('收到新消息');
+        socket.broadcast.emit('newMsg', onlineUsers[socket.name], msg, color);
+    });
+    //接收新私信(P2P)
+    socket.on('privateMsg', function(msg, color, userid) {
+        socketList[userid].emit('newMsg', onlineUsers[socket.name], msg, color);
+    });
+    //接收新图片
+    socket.on('img', function(imgData, color) {
+        console.log('收到新图片');
+        socket.broadcast.emit('newImg', onlineUsers[socket.name], imgData, color);
+    });
+    //接收新私人图片（P2P）
+    socket.on('privateimg', function(imgData, color, userid) {
+        socketList[userid].emit('newImg', onlineUsers[socket.name], imgData, color);
+    });
+});
+
+ server.listen(3000, function(){
+                        console.log('listening on :3000');
+                      });//监听端口是否有来自客户端的请求
